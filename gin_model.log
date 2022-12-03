@@ -1,0 +1,31 @@
+{"level":"DEBUG","time":"2022-09-19T10:27:03.666+0800","caller":"gin_model/main.go:39","msg":"logger init success..."}
+{"level":"ERROR","time":"2022-09-19T10:27:03.754+0800","caller":"mysql/mysql.go:26","msg":"connect DB failed","error":"Error 1045: Access denied for user 'root'@'localhost' (using password: YES)"}
+{"level":"DEBUG","time":"2022-09-19T10:27:39.981+0800","caller":"gin_model/main.go:39","msg":"logger init success..."}
+{"level":"INFO","time":"2022-09-19T10:48:27.118+0800","caller":"gin_model/main.go:80","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2022-09-19T10:48:27.121+0800","caller":"gin_model/main.go:89","msg":"Server exiting"}
+{"level":"DEBUG","time":"2022-09-19T10:48:35.269+0800","caller":"gin_model/main.go:39","msg":"logger init success..."}
+{"level":"INFO","time":"2022-09-19T10:49:00.436+0800","caller":"gin_model/main.go:80","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2022-09-19T10:49:00.436+0800","caller":"gin_model/main.go:89","msg":"Server exiting"}
+{"level":"DEBUG","time":"2022-09-19T10:49:46.985+0800","caller":"gin_model/main.go:39","msg":"logger init success..."}
+{"level":"INFO","time":"2022-09-19T10:52:54.230+0800","caller":"gin_model/main.go:80","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2022-09-19T10:52:54.230+0800","caller":"gin_model/main.go:89","msg":"Server exiting"}
+{"level":"DEBUG","time":"2022-09-19T10:55:26.637+0800","caller":"gin_model/main.go:39","msg":"logger init success..."}
+{"level":"INFO","time":"2022-09-19T10:55:33.451+0800","caller":"gin_model/main.go:80","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2022-09-19T10:55:33.451+0800","caller":"gin_model/main.go:89","msg":"Server exiting"}
+{"level":"DEBUG","time":"2022-09-19T11:10:06.139+0800","caller":"gin_model/main.go:39","msg":"logger init success..."}
+{"level":"INFO","time":"2022-09-19T11:10:30.044+0800","caller":"gin_model/main.go:80","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2022-09-19T11:10:30.044+0800","caller":"gin_model/main.go:89","msg":"Server exiting"}
+{"level":"DEBUG","time":"2022-09-19T11:12:59.098+0800","caller":"gin_model/main.go:39","msg":"logger init success..."}
+{"level":"DEBUG","time":"2022-09-19T11:19:33.568+0800","caller":"gin_model/main.go:39","msg":"logger init success..."}
+{"level":"INFO","time":"2022-09-19T11:20:13.364+0800","caller":"gin_model/main.go:80","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2022-09-19T11:20:13.364+0800","caller":"gin_model/main.go:89","msg":"Server exiting"}
+{"level":"DEBUG","time":"2022-09-19T11:21:21.810+0800","caller":"gin_model/main.go:39","msg":"logger init success..."}
+{"level":"INFO","time":"2022-09-19T11:21:44.191+0800","caller":"logger/logger.go:70","msg":"//","status":404,"method":"GET","path":"//","query":"","ip":"127.0.0.1","user-agent":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36 SE 2.X MetaSr 1.0","errors":"","cost":0}
+{"level":"INFO","time":"2022-09-19T11:21:46.895+0800","caller":"logger/logger.go:70","msg":"/","status":404,"method":"GET","path":"/","query":"","ip":"127.0.0.1","user-agent":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36 SE 2.X MetaSr 1.0","errors":"","cost":0}
+{"level":"INFO","time":"2022-09-19T11:21:51.295+0800","caller":"logger/logger.go:70","msg":"/version","status":200,"method":"GET","path":"/version","query":"","ip":"127.0.0.1","user-agent":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36 SE 2.X MetaSr 1.0","errors":"","cost":0}
+{"level":"INFO","time":"2022-09-19T11:21:51.606+0800","caller":"logger/logger.go:70","msg":"/version","status":200,"method":"GET","path":"/version","query":"","ip":"127.0.0.1","user-agent":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36 SE 2.X MetaSr 1.0","errors":"","cost":0}
+{"level":"INFO","time":"2022-09-19T11:22:09.833+0800","caller":"logger/logger.go:70","msg":"/version","status":200,"method":"GET","path":"/version","query":"","ip":"127.0.0.1","user-agent":"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36 SE 2.X MetaSr 1.0","errors":"","cost":0.0001482}
+{"level":"INFO","time":"2022-09-19T11:22:13.242+0800","caller":"gin_model/main.go:80","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2022-09-19T11:22:13.242+0800","caller":"gin_model/main.go:89","msg":"Server exiting"}
+{"level":"INFO","time":"2022-09-19T11:22:29.805+0800","caller":"gin_model/main.go:80","msg":"Shutdown Server ..."}
+{"level":"INFO","time":"2022-09-19T11:22:29.806+0800","caller":"gin_model/main.go:89","msg":"Server exiting"}
