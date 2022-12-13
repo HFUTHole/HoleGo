@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"hole/src/pkg/utils"
+	"hole/pkgs/common/utils"
 	"testing"
 )
 

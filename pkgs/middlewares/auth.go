@@ -3,7 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"hole/src/pkg/utils"
+	"hole/pkgs/common/utils"
 	"net/http"
 )
 
@@ -15,6 +15,8 @@ func JwtAuthMiddleware() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
+
+		ctx.Set("user", 1)
 
 		ctx.Set("auth", auth)
 		ctx.Next()

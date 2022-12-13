@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"hole/src/models"
+	"hole/pkgs/models"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
