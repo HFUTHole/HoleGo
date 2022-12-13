@@ -27,10 +27,11 @@ type Authorized struct {
 	Subject   string `json:"sub,omitempty"`
 }
 
-func GenerateToken(id int64, sub string) (string, error) {
+func GenerateToken(uid int64, sub string, id int64) (string, error) {
 	claims := jwt.MapClaims{}
-	claims["aud"] = id
+	claims["aud"] = uid
 	claims["sub"] = sub
+	claims["jti"] = id
 	now := time.Now()
 	claims["iat"] = now.Unix()
 	claims["exp"] = now.Add(time.Duration(TokenHourLifespan) * time.Second).Unix()

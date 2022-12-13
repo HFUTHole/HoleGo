@@ -9,7 +9,7 @@ import (
 
 func TestGenerateToken(t *testing.T) {
 
-	token, err := utils.GenerateToken(123456, "sub")
+	token, err := utils.GenerateToken(123456, "sub", 2)
 	if err != nil {
 		t.Error("generate token error", err)
 	}
@@ -40,7 +40,7 @@ func TestTokenValid(t *testing.T) {
 }
 
 func TestTokenValid1(t *testing.T) {
-	token, _ = utils.GenerateToken(123456, "sub")
+	token, _ = utils.GenerateToken(123456, "sub", 2)
 	err := TokenValidT(token)
 	if err != nil {
 		t.Error(err)

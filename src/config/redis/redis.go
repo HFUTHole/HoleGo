@@ -1,15 +1,19 @@
-package settings
+package redis
 
 import (
 	"fmt"
 	"github.com/go-redis/redis"
+	"hole/src/config"
+	"log"
+	"os"
 )
 
 // 声明一个全局的rdb变量
 var rdb *redis.Client
 
 // InitRedis 初始化连接
-func InitRedis(cfg *RedisConfig) (err error) {
+func InitRedis() {
+	cfg := config.GetRedisConfig()
 	rdb = redis.NewClient(&redis.Options{
 		Addr: fmt.Sprintf("%s:%d",
 			cfg.Host,
@@ -19,9 +23,15 @@ func InitRedis(cfg *RedisConfig) (err error) {
 		DB:       cfg.DB,       // use default DB
 		PoolSize: cfg.PoolSize,
 	})
+	_, err := rdb.Ping().Result()
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(-1)
+	}
+}
 
-	_, err = rdb.Ping().Result()
-	return
+func GetRedis() *redis.Client {
+	return rdb
 }
 
 func CloseRedis() {

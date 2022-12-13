@@ -1,6 +1,8 @@
-package settings
+package logger
 
 import (
+	"github.com/natefinch/lumberjack"
+	"hole/src/config"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -10,31 +12,40 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
+var log *zap.Logger
+var sugaredLogger *zap.SugaredLogger
+
 // InitLogger 初始化Logger
-func InitLogger(cfg *LogConfig) (err error) {
+func InitLogger() {
+	cfg := config.GetLoggerConfig()
 	writeSyncer := getLogWriter(
+		cfg.Level,
 		cfg.Filename,
 		cfg.MaxSize,
 		cfg.MaxBackups,
 		cfg.MaxAge,
 	)
 	encoder := getEncoder()
-	var l = new(zapcore.Level)
-	err = l.UnmarshalText([]byte(cfg.Level))
-	if err != nil {
-		return
-	}
-	core := zapcore.NewCore(encoder, writeSyncer, l)
 
-	lg := zap.New(core, zap.AddCaller())
+	core := zapcore.NewCore(encoder, writeSyncer, cfg.Level)
+
+	log = zap.New(core, zap.AddCaller())
+	sugaredLogger = log.Sugar()
 	// 替换zap库中全局的logger
-	zap.ReplaceGlobals(lg)
+	zap.ReplaceGlobals(log)
 	return
+}
+
+func GetLogger() *zap.Logger {
+	return log
+}
+
+func GetSugaredLogger() *zap.SugaredLogger {
+	return sugaredLogger
 }
 
 func getEncoder() zapcore.Encoder {
@@ -47,15 +58,23 @@ func getEncoder() zapcore.Encoder {
 	return zapcore.NewJSONEncoder(encoderConfig)
 }
 
-func getLogWriter(filename string, maxSize, maxBackup, maxAge int) zapcore.WriteSyncer {
+func getLogWriter(level zapcore.Level, filename string, maxSize, maxBackup, maxAge int) zapcore.WriteSyncer {
+	if filename != "" {
+		return zapcore.AddSync(zapcore.AddSync(os.Stdout))
+	}
+
 	lumberJackLogger := &lumberjack.Logger{
 		Filename:   filename,
 		MaxSize:    maxSize,
 		MaxBackups: maxBackup,
 		MaxAge:     maxAge,
 	}
-	//return zapcore.AddSync(lumberJackLogger)
-	return zapcore.NewMultiWriteSyncer(zapcore.AddSync(lumberJackLogger), zapcore.AddSync(os.Stdout))
+	if level <= zapcore.DebugLevel {
+		return zapcore.NewMultiWriteSyncer(zapcore.AddSync(lumberJackLogger), zapcore.AddSync(os.Stdout))
+	}
+
+	return zapcore.AddSync(lumberJackLogger)
+
 }
 
 // GinLogger 接收gin框架默认的日志

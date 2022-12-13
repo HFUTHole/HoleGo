@@ -2,8 +2,9 @@ package utils
 
 import "golang.org/x/crypto/bcrypt"
 
-func GeneratePassword(password string) ([]byte, error) {
-	return bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func GeneratePassword(password string) (string, error) {
+	fromPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(fromPassword), err
 }
 
 func VerifyPassword(password string, hashPassword string) error {

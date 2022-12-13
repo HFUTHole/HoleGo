@@ -1,11 +1,5 @@
 package response
 
-/**
- * @Author huchao
- * @Description //TODO 定义业务状态码
- * @Date 22:11 2022/2/10
- **/
-
 type MyCode int64
 
 const (

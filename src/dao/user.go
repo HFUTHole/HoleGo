@@ -1,20 +1,32 @@
 package dao
 
-// CheckUserExist 检查用户名是否存在
-//func CheckUserExist(username string) (error error) {
-//	sqlstr := `select count(user_id) from user where username = ?`
-//	var count int
-//	if err := db.Get(&count,sqlstr,username);err != nil {
-//		return err
-//	}
-//	if count > 0 {
-//		return errors.New("用户已存在")
-//	}
-//	return
-//}
+import (
+	"errors"
+	"gorm.io/gorm"
+	"hole/src/models"
+)
 
-// SignUp 创建用户
-//func SignUp(user models.User) (error error) {
-//	db.Create(user)
-//	return
-//}
+func CreateUser(tx *gorm.DB, user *models.User) error {
+	err := tx.Create(user).Error
+	return err
+}
+
+func GetUserByStudentID(tx *gorm.DB, studentId int64) (*models.User, error) {
+	var user models.User
+
+	err := tx.Model(&models.User{}).Where("student_id = ?", studentId).First(&user).Error
+	if err != nil {
+		return nil, errors.New("未查询到用户")
+	}
+	return &user, nil
+}
+
+func GetUserByID(tx *gorm.DB, id int64) (*models.User, error) {
+	var user models.User
+
+	err := tx.Model(&models.User{}).Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return nil, errors.New("未查询到用户")
+	}
+	return &user, nil
+}

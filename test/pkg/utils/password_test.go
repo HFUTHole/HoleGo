@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const password = "123456"
+const password = "123456gfdgdfgdgdfgdfgdfg"
 
 const hashPassword = "$2a$10$9oEPoU.mIwXZWJ3a2OCYzeGB2Wk8/L97UDg0yo.u2EBTF3zo/0uze"
 
@@ -15,6 +15,7 @@ func TestGeneratePassword(t *testing.T) {
 		t.Error(err)
 	}
 
+	t.Logf("len = %d\n", len(password))
 	t.Logf("password: %s", password)
 }
 

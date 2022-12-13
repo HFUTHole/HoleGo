@@ -3,69 +3,44 @@ package main
 import (
 	"context"
 	"fmt"
+	"go.uber.org/zap"
+	"hole/src/config"
+	"hole/src/config/logger"
+	"hole/src/config/mysql"
+	"hole/src/config/redis"
 	"hole/src/routers"
-	"hole/src/settings"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 // Go Web开发较通用的脚手架模板
 
 func main() {
 	// 1. 加载配置
-	if err := settings.InitConfig(); err != nil {
-		fmt.Printf("init settings failed, err:%v\n", err)
-		return
-	}
-
+	config.InitConfigFile()
 	// 2. 初始化日志
-	if err := settings.InitLogger(settings.Conf.LogConfig); err != nil {
-		fmt.Printf("init logger failed, err:%v\n", err)
-		return
-	}
-	defer zap.L().Sync()
-	zap.L().Debug("logger init success...")
-
-	// 3. 初始化MySQL连接
-	//if err := mysql.InitLogger(settings.Conf.MySQLConfig); err != nil {
-	//	fmt.Printf("init mysql failed, err:%v\n", err)
-	//	return
-	//}
-	//defer mysql.CloseRedis()
-	if err := settings.InitGorm(settings.Conf.MySQLConfig); err != nil {
-		fmt.Printf("init mysql failed, err:%v\n", err)
-		return
-	}
-	defer settings.CloseGorm()
-
+	logger.InitLogger()
+	logger.GetLogger().Info("logger init success...")
+	// 3. 初始化 mysql
+	mysql.InitMysql()
 	// 4. 初始化Redis连接
-	if err := settings.InitRedis(settings.Conf.RedisConfig); err != nil {
-		fmt.Printf("init redis failed, err:%v\n", err)
-		return
-	}
-	defer settings.CloseRedis()
-
+	redis.InitRedis()
 	// 5. 注册路由
-	r := routers.Setup(settings.Conf.Mode)
-
+	r := routers.Setup()
 	// 6. 启动服务（优雅关机）
-
-	zap.L().Debug("listener port ...", zap.Int("port", settings.Conf.Port))
+	logger.GetLogger().Debug("listener port ...", zap.Int("port", config.GetPort()))
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", settings.Conf.Port),
+		Addr:    fmt.Sprintf(":%d", config.GetPort()),
 		Handler: r,
 	}
 
 	go func() {
 		// 开启一个goroutine启动服务
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			logger.GetSugaredLogger().Fatalf("listen: %s\n", err)
 		}
 	}()
 

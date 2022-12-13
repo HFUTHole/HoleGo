@@ -3,7 +3,7 @@ name: hole-docker
 
 services:
   redis_db:
-    container_name: redis
+    container_name: cache
     image: redis:latest
     ports:
       - "6379:6379"
