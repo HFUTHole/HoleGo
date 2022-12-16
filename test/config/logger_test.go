@@ -1,8 +1,8 @@
 package config
 
 import (
-	"hole/src/config"
-	"hole/src/config/logger"
+	"hole/pkgs/config"
+	"hole/pkgs/config/logger"
 	"testing"
 )
 

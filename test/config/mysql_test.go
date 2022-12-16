@@ -2,9 +2,9 @@ package config
 
 import (
 	"gorm.io/gorm"
-	"hole/src/config"
-	"hole/src/config/mysql"
-	"hole/src/models"
+	"hole/pkgs/config"
+	"hole/pkgs/config/mysql"
+	"hole/pkgs/models"
 	"testing"
 	"time"
 )

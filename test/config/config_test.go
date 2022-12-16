@@ -1,7 +1,7 @@
 package config
 
 import (
-	"hole/src/config"
+	"hole/pkgs/config"
 	"testing"
 )
 

@@ -1,0 +1,8 @@
+POST http://localhost:8888/api/content/create
+
+{
+
+}
+
+###
+GET http://localhost:8888/version

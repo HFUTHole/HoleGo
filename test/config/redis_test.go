@@ -1,8 +1,8 @@
 package config
 
 import (
-	"hole/src/config"
-	"hole/src/config/redis"
+	"hole/pkgs/config"
+	"hole/pkgs/config/redis"
 	"testing"
 	"time"
 )

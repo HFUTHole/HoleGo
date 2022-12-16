@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"hole/src/pkg/utils"
+	"hole/pkgs/common/utils"
 	"testing"
 )
 
