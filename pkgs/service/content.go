@@ -138,6 +138,12 @@ func GetContent(cid int64) (*vo.ContentVO, error) {
 		}
 
 		contentVO = vo.ConvertConvertContentVO(content, tags, urls, images)
+		voting, err := GetContentVoting(cid)
+		if err != nil {
+			return &exception.BusinessException{Msg: "帖子投票查询错误"}
+		}
+		contentVO.Voting = voting
+
 		return nil
 	})
 	if err != nil {

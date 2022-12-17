@@ -34,6 +34,8 @@ func InitMysql() {
 		&models.Tag{},
 		&models.ContentTag{},
 		&models.ContentImage{},
+		&models.VotingOption{},
+		&models.VotingInfo{},
 	)
 	if err != nil {
 		fmt.Println("表迁移失败！", err)

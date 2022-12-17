@@ -212,3 +212,13 @@ func TestGetContentOneDayCount(t *testing.T) {
 	}
 	t.Log(day)
 }
+
+func TestSetContentVoteEndTime(t *testing.T) {
+	db := GetDB()
+
+	err := SetContentVoteEndTime(db, 1603642475187015680, 1, time.Now().Add(time.Hour*3))
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+}

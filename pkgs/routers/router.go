@@ -34,6 +34,12 @@ func Setup() *gin.Engine {
 	api.GET("/content/page",
 		controllers.GetContentPage(),
 	)
+	api.POST("/content/voting/create",
+		controllers.CreateContentVote(),
+	)
 
+	api.POST("/content/voting",
+		controllers.Vote(),
+	)
 	return r
 }

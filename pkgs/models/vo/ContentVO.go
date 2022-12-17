@@ -17,6 +17,7 @@ type ContentVO struct {
 	JumpUrl map[string]ContentJumpUrlVO `json:"jumpUrl"`
 	Tags    []TagVO                     `json:"tags"`
 	Images  []ContentImageVO            `json:"images"`
+	Voting  []VotingOptionVO            `json:"voting,omitempty"`
 }
 
 type ContentImageVO struct {

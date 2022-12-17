@@ -11,7 +11,9 @@ type Content struct {
 	Nick      string         `json:"nick" gorm:"varchar(64) not null"`
 	Avatar    string         `json:"Avatar" gorm:"type:varchar(64) not null"`
 	Like      int64          `json:"like" gorm:"type:int default '0'"`
-	Real      int            `json:"real" gorm:"type:tinyint not null comment '是否实名'"`
+	Real      int            `json:"real" gorm:"type:tinyint not null default '0' comment '是否实名'"`
+	Voting    int            `json:"voting" gorm:"type:tinyint not null default '0'"` // 0 未开启 1 开启
+	EndTime   time.Time      `json:"endTime" gorm:"type:datetime default null"`
 	Title     string         `json:"title" gorm:"type:varchar(32) not null ;index"`
 	Text      string         `json:"text" gorm:"type:varchar(2048) not null"`
 	CreatedAt time.Time      `json:"createdAt" gorm:"type:datetime not null default current_timestamp() comment '创建时间'; index"`
