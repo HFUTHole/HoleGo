@@ -2,7 +2,7 @@ package logger
 
 import (
 	"github.com/natefinch/lumberjack"
-	"hole/pkgs/config"
+	"github.com/spf13/viper"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -16,12 +16,58 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var cfg *Config
 var log *zap.Logger
 var sugaredLogger *zap.SugaredLogger
 
-// InitLogger 初始化Logger
-func InitLogger() {
-	cfg := config.GetLoggerConfig()
+type Config struct {
+	Level      zapcore.Level `json:"level"`
+	Filename   string        `json:"filename"`
+	MaxSize    int           `json:"max_size"`
+	MaxAge     int           `json:"max_age"`
+	MaxBackups int           `json:"max_backups"`
+}
+
+func InitConfig() {
+	var level = zapcore.InfoLevel
+	var filename = ""
+	var maxSize = 300
+	var maxAge = 30
+	var maxBackups = 7
+
+	filename = viper.GetString("log.filename")
+	if ls := viper.GetString("log.level"); ls != "" {
+		var l = zapcore.InfoLevel
+		err := l.UnmarshalText([]byte(ls))
+		if err == nil {
+			level = l
+		}
+	}
+
+	if ms := viper.GetInt("log.max_size"); ms > 0 {
+		maxSize = ms
+	}
+
+	if ma := viper.GetInt("log.max_age"); ma > 0 {
+		maxAge = ma
+	}
+
+	if mb := viper.GetInt("log.max_age"); mb > 0 {
+		maxBackups = mb
+	}
+
+	cfg = &Config{
+		Level:      level,
+		Filename:   filename,
+		MaxSize:    maxSize,
+		MaxAge:     maxAge,
+		MaxBackups: maxBackups,
+	}
+}
+
+// Init 初始化 Logger
+func Init() {
+	InitConfig()
 	writeSyncer := getLogWriter(
 		cfg.Level,
 		cfg.Filename,

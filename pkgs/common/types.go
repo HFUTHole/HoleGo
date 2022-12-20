@@ -26,6 +26,7 @@ func (mt *DateTime) UnmarshalJSON(bs []byte) error {
 	*mt = DateTime(t)
 	return nil
 }
+
 func (t DateTime) MarshalJSON() ([]byte, error) {
 	b := make([]byte, 0, len(timeFormat)+2)
 	b = append(b, '"')

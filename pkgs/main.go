@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"hole/pkgs/config"
+	"hole/pkgs/config/base"
 	"hole/pkgs/config/logger"
-	"hole/pkgs/config/mysql"
-	"hole/pkgs/config/redis"
 	"hole/pkgs/routers"
 	"net/http"
 	"os"
@@ -19,22 +18,14 @@ import (
 // Go Web开发较通用的脚手架模板
 
 func main() {
-	// 1. 加载配置
-	config.InitConfigFile()
-	config.InitUtils()
-	// 2. 初始化日志
-	logger.InitLogger()
-	logger.GetLogger().Info("logger init success...")
-	// 3. 初始化 mysql
-	mysql.InitMysql()
-	// 4. 初始化Redis连接
-	redis.InitRedis()
+	config.Init()
+
 	// 5. 注册路由
 	r := routers.Setup()
 	// 6. 启动服务（优雅关机）
-	logger.GetLogger().Debug("listener port ...", zap.Int("port", config.GetPort()))
+	logger.GetLogger().Debug("listener port ...", zap.Int("port", base.GetPort()))
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.GetPort()),
+		Addr:    fmt.Sprintf(":%d", base.GetPort()),
 		Handler: r,
 	}
 

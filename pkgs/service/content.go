@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/bwmarrin/snowflake"
 	"gorm.io/gorm"
 	"hole/pkgs/common/utils"
 	"hole/pkgs/config/mysql"
@@ -12,6 +13,12 @@ import (
 	"strconv"
 	"time"
 )
+
+var node, _ = snowflake.NewNode(1)
+
+func NextID() int64 {
+	return int64(node.Generate())
+}
 
 func CreateContent(uid int64, title string, message string, tags []string, urls []string, real bool) (*vo.ContentVO, error) {
 	title = utils.Scape(title)
@@ -33,7 +40,7 @@ func CreateContent(uid int64, title string, message string, tags []string, urls 
 		return nil, &exception.ClientException{Msg: "帖子照片路径超出规定长度"}
 	}
 
-	cid := utils.NextSnowflake()
+	cid := NextID()
 
 	db := mysql.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {

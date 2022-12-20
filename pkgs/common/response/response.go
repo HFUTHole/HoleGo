@@ -1,6 +1,9 @@
 package response
 
 import (
+	"github.com/minio/minio-go/v6"
+	"go.uber.org/zap"
+	"hole/pkgs/config/logger"
 	"hole/pkgs/exception"
 	"net/http"
 
@@ -15,6 +18,10 @@ type Data struct {
 
 func Error403(ctx *gin.Context, msg string) {
 	Error(ctx, http.StatusForbidden, msg)
+}
+
+func Error404(ctx *gin.Context, msg string) {
+	Error(ctx, http.StatusNotFound, msg)
 }
 
 func Error500(ctx *gin.Context, msg string) {
@@ -46,6 +53,35 @@ func SuccessWithMsg(ctx *gin.Context, data interface{}, msg string) {
 		Data:    data,
 	}
 	ctx.JSON(http.StatusOK, rd)
+}
+
+func WriteObject(ctx *gin.Context, obj *minio.Object) {
+
+	stat, err := obj.Stat()
+	if err != nil {
+		Error404(ctx, "资源不存在")
+		return
+	}
+	contentType := stat.ContentType
+	ctx.Header("ContentType", contentType)
+	writer := ctx.Writer
+
+	var buf = make([]byte, 1024)
+	n, err := obj.Read(buf)
+	for ; err == nil; n, err = obj.Read(buf) {
+		if n == 1024 {
+			_, e := writer.Write(buf)
+			if e != nil {
+				logger.GetLogger().Error("图片写回错误", zap.Error(e))
+			}
+		} else {
+			_, e := writer.Write(buf[0:n])
+			if e != nil {
+				logger.GetLogger().Error("图片写回错误", zap.Error(e))
+			}
+		}
+	}
+	writer.Flush()
 }
 
 func HandleBusinessException(ctx *gin.Context, err error) {

@@ -25,3 +25,9 @@ redis:
   db: 0
   pool_size: 30
 #  password: "123456"
+
+minio:
+  end_point: 127.0.0.1:9000
+  access_key: AKIAIOSFODNN7EXAMPLE
+  secret: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  

@@ -10,9 +10,8 @@ import (
 
 func TestCreateContent(t *testing.T) {
 	config.InitConfigFileWithTest()
-	config.InitUtils()
-	logger.InitLogger()
-	mysql.InitMysql()
+	logger.Init()
+	mysql.Init()
 
 	content, err := CreateContent(
 		1,
@@ -31,9 +30,9 @@ func TestCreateContent(t *testing.T) {
 
 func TestSearchMessageJumpUrls(t *testing.T) {
 	config.InitConfigFileWithTest()
-	config.InitUtils()
-	//logger.InitLogger()
-	mysql.InitMysql()
+	config.Init()
+	//logger.Init()
+	mysql.Init()
 	urls, err := SearchMessageJumpUrls("#1603047268133376000 #1603047268133376000 hello", 1)
 	if err != nil {
 		t.Error(err)
@@ -44,9 +43,8 @@ func TestSearchMessageJumpUrls(t *testing.T) {
 
 func TestGetContent(t *testing.T) {
 	config.InitConfigFileWithTest()
-	config.InitUtils()
-	//logger.InitLogger()
-	mysql.InitMysql()
+	//logger.Init()
+	mysql.Init()
 	content, err := GetContent(1603642730045509632)
 	if err != nil {
 		t.Error(err)
@@ -57,9 +55,8 @@ func TestGetContent(t *testing.T) {
 
 func TestGetContentPage(t *testing.T) {
 	config.InitConfigFileWithTest()
-	config.InitUtils()
-	//logger.InitLogger()
-	mysql.InitMysql()
+	//logger.Init()
+	mysql.Init()
 
 	page, err := GetContentPage(10)
 	if err != nil {
@@ -71,9 +68,8 @@ func TestGetContentPage(t *testing.T) {
 
 func TestGetContentNextPage(t *testing.T) {
 	config.InitConfigFileWithTest()
-	config.InitUtils()
-	//logger.InitLogger()
-	mysql.InitMysql()
+	//logger.Init()
+	mysql.Init()
 
 	page, err := GetContentNextPage(1603690087504154624, 10)
 	if err != nil {

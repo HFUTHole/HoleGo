@@ -9,7 +9,7 @@ import (
 func TestGetLogger(t *testing.T) {
 	config.InitConfigFileWithTest()
 
-	logger.InitLogger()
+	logger.Init()
 
 	logger.GetLogger().Info("hello")
 

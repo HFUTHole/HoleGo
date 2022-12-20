@@ -2,13 +2,13 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"hole/pkgs/config"
+	"hole/pkgs/config/base"
 	"hole/pkgs/config/logger"
 	"hole/pkgs/routers/controllers"
 )
 
 func Setup() *gin.Engine {
-	if config.GetMode() == gin.ReleaseMode {
+	if base.GetMode() == gin.ReleaseMode {
 		gin.SetMode(gin.ReleaseMode) // 设置发布或者生产模式
 	}
 
@@ -22,6 +22,15 @@ func Setup() *gin.Engine {
 
 	api.POST("/signup",
 		controllers.Signup(),
+	)
+
+	api.POST("/image",
+		controllers.UpdateImage(),
+	)
+
+	r.GET(
+		"/image/:bucket/:id",
+		controllers.DownloadImage(),
 	)
 
 	api.POST("/content/create",
