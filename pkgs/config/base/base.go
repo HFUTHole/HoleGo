@@ -8,6 +8,7 @@ type Config struct {
 	Mode    string
 	Port    int
 	Version string
+	Domain  string
 }
 
 // Init initial base configuration
@@ -25,11 +26,16 @@ func Init() {
 	if version == "" {
 		version = "未设置版本号"
 	}
+	domain := viper.GetString("domain")
+	if domain == "" {
+		domain = "127.0.0.1"
+	}
 
 	cfg = &Config{
 		Mode:    mode,
 		Port:    port,
 		Version: version,
+		Domain:  domain,
 	}
 }
 
@@ -46,4 +52,8 @@ func GetPort() int {
 // GetVersion return the version of the application
 func GetVersion() string {
 	return cfg.Version
+}
+
+func GetDomain() string {
+	return cfg.Domain
 }

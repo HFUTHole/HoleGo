@@ -89,7 +89,7 @@ func CreateVote(uid int64, cid int64, vid int64) (*vo.ContentVO, error) {
 			return &exception.ClientException{Msg: "未查询到该贴子信息"}
 		}
 
-		if content.EndTime.After(time.Now()) {
+		if content.EndTime.Before(time.Now()) {
 			return &exception.ClientException{Msg: "投票已结束"}
 		}
 
@@ -100,6 +100,15 @@ func CreateVote(uid int64, cid int64, vid int64) (*vo.ContentVO, error) {
 
 		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
 			return &exception.ClientException{Msg: "没有投票权限"}
+		}
+
+		option, e := dao.GetContentVotingOption(tx, vid)
+		if e != nil {
+			return &exception.ClientException{Msg: "投票选项错误"}
+		}
+
+		if option.Cid != content.ID {
+			return &exception.ClientException{Msg: "投票选项不存在"}
 		}
 
 		count, e := dao.GetVoteContentCount(tx, uid, cid)
@@ -122,4 +131,29 @@ func CreateVote(uid int64, cid int64, vid int64) (*vo.ContentVO, error) {
 	content, err := GetContent(cid)
 
 	return content, err
+}
+
+func DeleteVote(uid, cid int64) (*vo.ContentVO, error) {
+	err := mysql.GetDB().Transaction(func(tx *gorm.DB) error {
+		user, err := dao.GetUserByID(tx, uid)
+		if err != nil {
+			return &exception.ClientException{Msg: "用户不存在"}
+		}
+		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+			return &exception.ClientException{Msg: "您还不可以投票哦"}
+		}
+
+		err = dao.DeleteVotingInfo(tx, user.ID, cid)
+		if err != nil {
+			return &exception.ClientException{Msg: "您可能还没有投票哦"}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return GetContent(cid)
 }

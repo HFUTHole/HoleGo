@@ -28,7 +28,7 @@ type Config struct {
 	MaxOpenConns int
 }
 
-func InitConfig() *Config {
+func InitConfig() {
 	var url string
 	var username string
 	var password string
@@ -122,7 +122,7 @@ func InitConfig() *Config {
 		MaxOpenConns = size
 	}
 
-	return &Config{
+	cfg = &Config{
 		Url:          url,
 		Username:     username,
 		Password:     password,

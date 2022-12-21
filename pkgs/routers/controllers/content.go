@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"hole/pkgs/common/response"
+	"hole/pkgs/common/utils"
 	"hole/pkgs/service"
 	"strconv"
 )
@@ -97,7 +98,7 @@ func GetContentPage() gin.HandlerFunc {
 
 func GetContent() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		cid, err := strconv.ParseInt(ctx.Query("cid"), 10, 64)
+		cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 64)
 		if err != nil {
 			response.Error403(ctx, "参数错误: cid")
 		}
@@ -109,5 +110,30 @@ func GetContent() gin.HandlerFunc {
 		}
 
 		response.Success(ctx, content)
+	}
+}
+
+func DeleteContent() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+		cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 64)
+		if err != nil {
+			response.Error403(ctx, "参数错误")
+			return
+		}
+		uid, err := utils.GetUid(ctx)
+		if err != nil {
+			response.Error401(ctx, "未登录")
+			return
+		}
+
+		err = service.DeleteContent(uid, cid)
+		if err != nil {
+			response.HandleBusinessException(ctx, err)
+			return
+		}
+
+		response.Success(ctx, true)
+
 	}
 }

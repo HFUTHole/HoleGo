@@ -2,6 +2,7 @@ name: "hole_go"
 mode: "dev"
 port: 8888
 version: "v0.1.55"
+domain: http://127.0.0.1
 
 log:
   level: "debug"
@@ -30,4 +31,4 @@ minio:
   end_point: 127.0.0.1:9000
   access_key: AKIAIOSFODNN7EXAMPLE
   secret: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-  
+

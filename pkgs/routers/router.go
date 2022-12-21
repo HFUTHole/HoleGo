@@ -33,22 +33,30 @@ func Setup() *gin.Engine {
 		controllers.DownloadImage(),
 	)
 
-	api.POST("/content/create",
+	api.POST("/content",
 		controllers.CreateContent(),
 	)
 
-	api.GET("/content/one",
+	api.DELETE("/content/:cid",
+		controllers.DeleteContent(),
+	)
+
+	api.GET("/content/:cid",
 		controllers.GetContent())
 
 	api.GET("/content/page",
 		controllers.GetContentPage(),
 	)
-	api.POST("/content/voting/create",
+	api.POST("/content/voting",
 		controllers.CreateContentVote(),
 	)
 
-	api.POST("/content/voting",
+	api.POST("/content/voting/:cid",
 		controllers.Vote(),
+	)
+
+	api.DELETE("/content/voting/:cid",
+		controllers.DeleteContentVote(),
 	)
 	return r
 }

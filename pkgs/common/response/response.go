@@ -16,6 +16,10 @@ type Data struct {
 	Data    interface{} `json:"data,omitempty"` // omitempty当data为空时,不展示这个字段
 }
 
+func Error401(ctx *gin.Context, msg string) {
+	Error(ctx, http.StatusUnauthorized, msg)
+}
+
 func Error403(ctx *gin.Context, msg string) {
 	Error(ctx, http.StatusForbidden, msg)
 }

@@ -35,7 +35,21 @@ func GetContentVotingOption(tx *gorm.DB, vid int64) (*models.VotingOption, error
 	var votingOption models.VotingOption
 	err := tx.Model(&models.VotingOption{}).Where("id = ?", vid).First(&votingOption).Error
 	return &votingOption, err
+}
 
+func DeleteVotingInfo(tx *gorm.DB, uid, cid int64) error {
+	err := tx.Exec("update voting_options set total = total - 1 where id = (select voting_infos.vid from voting_infos where voting_infos.uid = ? and cid = ?)", uid, cid).Error
+	if err != nil {
+		return err
+	}
+	err = tx.Exec("delete from voting_infos where uid = ? and cid = ?", uid, cid).Error
+	return err
+}
+
+func GetVotingInfo(tx *gorm.DB, uid, cid int64) (*models.VotingInfo, error) {
+	var info models.VotingInfo
+	err := tx.Model(&models.VotingInfo{}).Where("uid = ? AND cid = ?", uid, cid).First(&info).Error
+	return &info, err
 }
 
 func VoteContent(tx *gorm.DB, uid int64, cid int64, vid int64) error {

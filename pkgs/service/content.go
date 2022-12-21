@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/snowflake"
 	"gorm.io/gorm"
 	"hole/pkgs/common/utils"
+	"hole/pkgs/config/fileservice"
 	"hole/pkgs/config/mysql"
 	"hole/pkgs/dao"
 	"hole/pkgs/exception"
@@ -50,7 +51,7 @@ func CreateContent(uid int64, title string, message string, tags []string, urls 
 		}
 
 		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
-			return &exception.ClientException{Msg: "没有写权限"}
+			return &exception.ClientException{Msg: "没有写帖子权限"}
 		}
 
 		count, err := dao.GetContentOneDayCount(tx, time.Now())
@@ -63,14 +64,15 @@ func CreateContent(uid int64, title string, message string, tags []string, urls 
 		}
 
 		content := &models.Content{
-			ID:     cid,
-			Uid:    user.ID,
-			Nick:   user.Username,
-			Avatar: user.Avatar,
-			Like:   0,
-			Real:   utils.BoolToInt(real),
-			Title:  title,
-			Text:   message,
+			ID:      cid,
+			Uid:     user.ID,
+			Nick:    user.Username,
+			Avatar:  user.Avatar,
+			Like:    0,
+			Real:    utils.BoolToInt(real),
+			Title:   title,
+			Text:    message,
+			EndTime: time.Now(),
 		}
 		err = dao.CreateContent(tx, content)
 		if err != nil {
@@ -103,6 +105,13 @@ func CreateContent(uid int64, title string, message string, tags []string, urls 
 			}
 		}
 
+		for _, id := range urls {
+			err := fileservice.CopyFileToContent(id)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -122,7 +131,7 @@ func GetContent(cid int64) (*vo.ContentVO, error) {
 
 	db := mysql.GetDB()
 	err := db.Transaction(func(tx *gorm.DB) error {
-		content, err := dao.GetContentFormID(tx, cid)
+		content, err := dao.GetContentByID(tx, cid)
 
 		if err != nil {
 			return &exception.BusinessException{Msg: "未查询到该帖子"}
@@ -142,6 +151,10 @@ func GetContent(cid int64) (*vo.ContentVO, error) {
 		images, err := dao.GetContentImages(tx, cid)
 		if err != nil {
 			return &exception.BusinessException{Msg: "帖子照片查询错误"}
+		}
+
+		for i := range images {
+			images[i].URL = utils.ImageIdToUrl(images[i].URL, fileservice.ContentBucket)
 		}
 
 		contentVO = vo.ConvertConvertContentVO(content, tags, urls, images)
@@ -180,7 +193,7 @@ func SearchMessageJumpUrls(message string, parent int64) ([]models.ContentJumpUr
 			if err != nil {
 				return nil, &exception.ClientException{Msg: "错误的引用: #" + text}
 			}
-			content, err := dao.GetContentFormID(db, cid)
+			content, err := dao.GetContentByID(db, cid)
 			if err != nil {
 				return nil, &exception.ClientException{Msg: "错误的引用: #" + text}
 			}
@@ -240,4 +253,44 @@ func GetContentNextPage(maxId int64, pageSize int) (*vo.ContentPage, error) {
 		MaxId: maxID,
 		List:  vo.ConvertContentVOList(page),
 	}, nil
+}
+
+func DeleteContent(uid int64, cid int64) error {
+	db := mysql.GetDB()
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		user, err := dao.GetUserByID(tx, uid)
+		if err != nil {
+			return &exception.ClientException{Msg: "未查询到该用户"}
+		}
+
+		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+			return &exception.ClientException{Msg: "没有写帖子权限"}
+		}
+
+		content, err := dao.GetContent(tx, cid)
+		if err != nil {
+			return &exception.ServerException{Msg: "帖子查询错误"}
+		}
+
+		if content.Uid != user.ID {
+			return &exception.ClientException{Msg: "这不是你的帖子哦"}
+		}
+		if content.DeleteAt.Valid == true {
+			return &exception.ClientException{Msg: "帖子已经删除"}
+		}
+
+		err = dao.DeleteContentByID(tx, cid)
+		if err != nil {
+			return &exception.ClientException{Msg: "删除错误"}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

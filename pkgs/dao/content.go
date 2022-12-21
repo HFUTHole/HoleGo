@@ -23,10 +23,15 @@ func GetContent(tx *gorm.DB, cid int64) (models.Content, error) {
 	return content, err
 }
 
-func GetContentFormID(tx *gorm.DB, id int64) (*models.Content, error) {
+func GetContentByID(tx *gorm.DB, id int64) (*models.Content, error) {
 	var content models.Content
 	err := tx.Model(&content).Where("id = ?", id).First(&content).Error
 	return &content, err
+}
+
+func DeleteContentByID(tx *gorm.DB, id int64) error {
+	err := tx.Model(&models.Content{}).Delete("id = ?", id).Error
+	return err
 }
 
 func GetContentNextPage(tx *gorm.DB, maxID int64, limit int) ([]models.Content, error) {

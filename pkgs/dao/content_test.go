@@ -30,7 +30,7 @@ func TestCreateContent(t *testing.T) {
 func TestGetContentFormID(t *testing.T) {
 	db := GetDB()
 
-	content, err := GetContentFormID(db, 160304679018404659)
+	content, err := GetContentByID(db, 160304679018404659)
 	if err != nil {
 		t.Error(err)
 	}

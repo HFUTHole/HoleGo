@@ -4,27 +4,30 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"hole/pkgs/common/response"
+	"hole/pkgs/common/utils"
 	"hole/pkgs/config/fileservice"
 	"hole/pkgs/config/logger"
-	"strings"
 )
 
 func UpdateImage() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		file, err := ctx.FormFile("image")
+		if err != nil {
+			logger.GetLogger().Error("error form", zap.Error(err))
+			response.Error403(ctx, "错误的表单信息")
+			return
+		}
 		filename := file.Filename
-
-		suffix := filename[strings.LastIndex(filename, ".")+1:]
-
-		logger.GetLogger().Info("update filename", zap.String("suffix", suffix))
+		contentType, err := utils.FileNameToContentType(filename)
 
 		if err != nil {
-			logger.GetLogger().Fatal(err.Error(), zap.Error(err))
+			response.Error403(ctx, err.Error())
+			return
 		}
 
 		src, err := file.Open()
-		id, err := fileservice.PutFile(src, file.Size, "image/png")
+		id, err := fileservice.PutFile(src, file.Size, contentType)
 
 		if err != nil {
 			logger.GetLogger().Error("error", zap.Error(err))
@@ -38,7 +41,6 @@ func UpdateImage() gin.HandlerFunc {
 }
 
 func DownloadImage() gin.HandlerFunc {
-
 	return func(ctx *gin.Context) {
 		bucket := ctx.Param("bucket")
 		id := ctx.Param("id")

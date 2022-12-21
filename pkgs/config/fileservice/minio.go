@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"hole/pkgs/config/logger"
+	"hole/pkgs/exception"
 	"io"
 	"log"
 )
@@ -120,7 +121,7 @@ func copyFile(srcBucket string, dstBucket string, id string) error {
 			zap.String("id", id),
 			zap.Error(err),
 		)
-		return err
+		return &exception.ClientException{Msg: "构建目标文件信息错误"}
 	}
 
 	// Copy object call
@@ -132,7 +133,7 @@ func copyFile(srcBucket string, dstBucket string, id string) error {
 			zap.String("id", id),
 			zap.Error(err),
 		)
-		return err
+		return &exception.ClientException{Msg: "文件不存在"}
 	}
 
 	return nil
