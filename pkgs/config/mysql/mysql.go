@@ -157,6 +157,9 @@ func Init() {
 		&models.ContentImage{},
 		&models.VotingOption{},
 		&models.VotingInfo{},
+		&models.ContentLiked{},
+		&models.Reply{},
+		&models.AtName{},
 	)
 	if err != nil {
 		fmt.Println("表迁移失败！", err)

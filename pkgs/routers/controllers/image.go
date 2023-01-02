@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap"
 	"hole/pkgs/common/response"
 	"hole/pkgs/common/utils"
+	"hole/pkgs/config/base"
 	"hole/pkgs/config/fileservice"
 	"hole/pkgs/config/logger"
 )
@@ -34,7 +35,7 @@ func UpdateImage() gin.HandlerFunc {
 		}
 
 		ctx.JSON(200, gin.H{
-			"url": "http://127.0.0.1:8888/image/temp/" + id,
+			"url": base.GetDomain() + "/image/temp/" + id,
 			"id":  id,
 		})
 	}

@@ -14,7 +14,7 @@ func ScapeSlice(str []string) []string {
 	for i, s := range str {
 		replace := strings.Replace(s, "<", "&lt;", -1)
 		replace = strings.Replace(replace, ">", "&gt;", -1)
-		replace = strings.Replace(replace, " ", "&nbsp;", -1)
+		//replace = strings.Replace(replace, " ", "&nbsp;", -1)
 		res[i] = replace
 	}
 	return res

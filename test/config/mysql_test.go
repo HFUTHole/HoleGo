@@ -11,8 +11,6 @@ import (
 
 func TestGetDB(t *testing.T) {
 	config.InitConfigFileWithTest()
-	mysql.InitMysql()
-
 	getDB := mysql.GetDB()
 
 	t.Log(getDB)
@@ -20,7 +18,7 @@ func TestGetDB(t *testing.T) {
 
 func TestCreate(t *testing.T) {
 	config.InitConfigFileWithTest()
-	mysql.InitMysql()
+
 	db := mysql.GetDB()
 
 	err := db.Debug().Transaction(func(tx *gorm.DB) error {

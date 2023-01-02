@@ -84,6 +84,14 @@ func GetClient() *minio.Client {
 	return client
 }
 
+func Exists(bucket string, id string) bool {
+	_, err := client.StatObject(bucket, id, minio.StatObjectOptions{})
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func PutFile(reader io.Reader, size int64, contentType string) (string, error) {
 	name := ID.Generate().String()
 	n, err := client.PutObject(TempBucket, name, reader, size, minio.PutObjectOptions{ContentType: contentType})

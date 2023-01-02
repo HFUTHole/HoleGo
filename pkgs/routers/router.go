@@ -33,6 +33,13 @@ func Setup() *gin.Engine {
 		controllers.DownloadImage(),
 	)
 
+	setupContent(api)
+
+	return r
+}
+
+func setupContent(api *gin.RouterGroup) {
+
 	api.POST("/content",
 		controllers.CreateContent(),
 	)
@@ -47,6 +54,7 @@ func Setup() *gin.Engine {
 	api.GET("/content/page",
 		controllers.GetContentPage(),
 	)
+
 	api.POST("/content/voting",
 		controllers.CreateContentVote(),
 	)
@@ -56,7 +64,24 @@ func Setup() *gin.Engine {
 	)
 
 	api.DELETE("/content/voting/:cid",
-		controllers.DeleteContentVote(),
+		controllers.CancelContentVote(),
 	)
-	return r
+
+	// 点赞
+	api.POST("/content/liked/:cid",
+		controllers.CreateContentLiked(),
+	)
+
+	api.DELETE("/content/liked/:cid",
+		controllers.CancelContentLiked(),
+	)
+
+	// 回复
+	api.POST("/content/reply/:cid",
+		controllers.CreateReply(),
+	)
+
+	api.GET("/content/reply/:cid",
+		controllers.GetReplyPage(),
+	)
 }

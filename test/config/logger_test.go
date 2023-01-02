@@ -9,8 +9,6 @@ import (
 func TestGetLogger(t *testing.T) {
 	config.InitConfigFileWithTest()
 
-	logger.Init()
-
 	logger.GetLogger().Info("hello")
 
 	logger.GetSugaredLogger().Infof("hello %s", "debug")

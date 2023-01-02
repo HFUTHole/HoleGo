@@ -11,7 +11,7 @@ import (
 
 func GetDB() *gorm.DB {
 	config.InitConfigFileWithTest()
-	mysql.InitMysql()
+	mysql.Init()
 	return mysql.GetDB()
 }
 

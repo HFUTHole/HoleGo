@@ -54,7 +54,7 @@ func ConvertConvertContentVO(c *models.Content, tags []models.Tag, jumps []model
 		Nick:    c.Nick,
 		Avatar:  c.Avatar,
 		Like:    c.Like,
-		Real:    utils.IntToBoll(c.Real),
+		Real:    utils.IntToBool(c.Real),
 		Title:   c.Title,
 		Text:    c.Text,
 		Tags:    []TagVO{},

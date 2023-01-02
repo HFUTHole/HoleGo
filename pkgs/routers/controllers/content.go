@@ -137,3 +137,53 @@ func DeleteContent() gin.HandlerFunc {
 
 	}
 }
+
+func CreateContentLiked() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 64)
+		if err != nil {
+			response.Error403(ctx, "参数错误")
+			return
+		}
+
+		uid, err := utils.GetUid(ctx)
+		if err != nil {
+			response.Error403(ctx, "你可能还没有登录")
+			return
+		}
+
+		liked, err := service.CreateLiked(uid, cid)
+
+		if err != nil {
+			response.HandleBusinessException(ctx, err)
+			return
+		}
+
+		response.Success(ctx, liked)
+	}
+}
+
+func CancelContentLiked() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 64)
+		if err != nil {
+			response.Error403(ctx, "参数错误")
+			return
+		}
+
+		uid, err := utils.GetUid(ctx)
+		if err != nil {
+			response.Error403(ctx, "你可能还没有登录")
+			return
+		}
+
+		liked, err := service.CancelLiked(uid, cid)
+
+		if err != nil {
+			response.HandleBusinessException(ctx, err)
+			return
+		}
+
+		response.Success(ctx, liked)
+	}
+}

@@ -72,11 +72,7 @@ func Vote() gin.HandlerFunc {
 	}
 }
 
-type DeleteVoteReq struct {
-	Vid int64 `json:"vid" binding:"required"`
-}
-
-func DeleteContentVote() gin.HandlerFunc {
+func CancelContentVote() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 64)
 		if err != nil {
@@ -99,4 +95,8 @@ func DeleteContentVote() gin.HandlerFunc {
 
 		response.Success(ctx, vo)
 	}
+}
+
+func DeleteVote() {
+
 }

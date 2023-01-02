@@ -2,6 +2,8 @@ package dao
 
 import (
 	"gorm.io/gorm"
+	"hole/pkgs/config"
+	"hole/pkgs/config/mysql"
 	"hole/pkgs/models"
 	"testing"
 	"time"
@@ -221,4 +223,18 @@ func TestSetContentVoteEndTime(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
+}
+
+func TestCreateLiked(t *testing.T) {
+	config.InitConfigFileWithTest()
+	db := mysql.GetDB()
+	err := CreateLiked(db, 1, 1603642475187015680)
+	t.Log(err)
+}
+
+func TestCancelLiked(t *testing.T) {
+	config.InitConfigFileWithTest()
+	db := mysql.GetDB()
+	err := CancelLiked(db, 1, 1603642475187015680)
+	t.Log(err)
 }

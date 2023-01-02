@@ -45,3 +45,10 @@ type ContentTag struct {
 	Cid int64 `json:"cid" gorm:"type:bigint; index"`
 	Tid int64 `json:"tid" gorm:"type:bigint"`
 }
+
+type ContentLiked struct {
+	ID        int64     `json:"id" gorm:"type:bigint ;primaryKey"`
+	Cid       int64     `json:"cid" gorm:"type:bigint not null; index:idx_cid_uid,unique"`
+	Uid       int64     `json:"uid" gorm:"type:bigint not null; index:idx_cid_uid,unique"`
+	CreatedAt time.Time `json:"createdAt" gorm:"type:datetime not null default current_timestamp() comment '创建时间'"`
+}

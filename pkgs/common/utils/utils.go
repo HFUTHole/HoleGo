@@ -7,9 +7,9 @@ func BoolToInt(b bool) int {
 	return 0
 }
 
-func IntToBoll(i int) bool {
-	if i > 0 {
-		return true
+func IntToBool(i int) bool {
+	if i == 0 {
+		return false
 	}
-	return false
+	return true
 }

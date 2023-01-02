@@ -294,3 +294,55 @@ func DeleteContent(uid int64, cid int64) error {
 
 	return nil
 }
+
+func CreateLiked(uid int64, cid int64) (*vo.ContentVO, error) {
+	err := mysql.GetDB().Transaction(func(tx *gorm.DB) error {
+		user, err := dao.GetUserByID(tx, uid)
+		if err != nil {
+			return &exception.ClientException{Msg: "未查询到该用户"}
+		}
+
+		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+			return &exception.ClientException{Msg: "没有点赞权限"}
+		}
+
+		err = dao.CreateLiked(tx, uid, cid)
+		if err != nil {
+			return &exception.ClientException{Msg: "已点赞"}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return GetContent(cid)
+}
+
+func CancelLiked(uid int64, cid int64) (*vo.ContentVO, error) {
+	err := mysql.GetDB().Transaction(func(tx *gorm.DB) error {
+		user, err := dao.GetUserByID(tx, uid)
+		if err != nil {
+			return &exception.ClientException{Msg: "未查询到该用户"}
+		}
+
+		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+			return &exception.ClientException{Msg: "没有点赞权限"}
+		}
+
+		err = dao.CancelLiked(tx, uid, cid)
+		if err != nil {
+			return &exception.ClientException{Msg: "你可能还没有点赞哦"}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return GetContent(cid)
+}

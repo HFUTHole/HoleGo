@@ -140,3 +140,32 @@ func GetContentImages(tx *gorm.DB, cid int64) ([]models.ContentImage, error) {
 	err := tx.Model(&models.ContentImage{}).Where("cid = ?", cid).Find(&images).Error
 	return images, err
 }
+
+func CreateLiked(tx *gorm.DB, uid int64, cid int64) error {
+	err := tx.Model(&models.ContentLiked{}).Create(&models.ContentLiked{
+		Cid: cid,
+		Uid: uid,
+	}).Error
+	if err != nil {
+		return err
+	}
+	err = tx.Model(&models.Content{}).Where("id = ?", cid).UpdateColumn("like", gorm.Expr("`like` + 1")).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CancelLiked(tx *gorm.DB, uid int64, cid int64) error {
+	err := tx.Model(&models.ContentLiked{}).Where("uid = ? and cid = ?", uid, cid).Delete(&models.ContentLiked{}).Error
+	if err != nil {
+		return err
+	}
+
+	err = tx.Model(&models.Content{}).Where("id = ?", cid).UpdateColumn("like", gorm.Expr("`like` - 1")).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

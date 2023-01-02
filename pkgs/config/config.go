@@ -34,6 +34,7 @@ func InitConfigFileWithTest() {
 	if err != nil {
 		log.Printf("configuration file read error: %v\n", err)
 	}
+	InitComponents()
 }
 
 func InitComponents() {
