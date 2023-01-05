@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"hole/pkgs/dao"
 	"hole/pkgs/models"
 	"testing"
 )
@@ -18,7 +19,7 @@ func TestCreateLogin(t *testing.T) {
 		Subject:   "Window 10",
 	}
 
-	err := CreateToken(db, login)
+	err := dao.CreateToken(db, login)
 	if err != nil {
 		t.Error(err)
 		return

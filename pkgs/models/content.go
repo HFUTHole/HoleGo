@@ -12,12 +12,14 @@ type Content struct {
 	Avatar    string         `json:"Avatar" gorm:"type:varchar(64) not null"`
 	Like      int64          `json:"like" gorm:"type:int default '0'"`
 	Real      int            `json:"real" gorm:"type:tinyint not null default '0' comment '是否实名'"`
+	Aid       int64          `json:"aid" gorm:"type:bigint"`
 	Voting    int            `json:"voting" gorm:"type:tinyint not null default '0'"` // 0 未开启 1 开启
 	EndTime   time.Time      `json:"endTime" gorm:"type:datetime default null"`
 	Title     string         `json:"title" gorm:"type:varchar(32) not null ;index"`
 	Text      string         `json:"text" gorm:"type:varchar(2048) not null"`
 	CreatedAt time.Time      `json:"createdAt" gorm:"type:datetime not null default current_timestamp() comment '创建时间'; index"`
 	UpdatedAt time.Time      `json:"updatedAt" gorm:"datetime not null default current_timestamp() on update current_timestamp() comment '跟新时间'"`
+	DeleteUid int64          `json:"deleteUid" gorm:"type:bigint"`
 	DeleteAt  gorm.DeletedAt `json:"deleteAt" gorm:"index"`
 }
 

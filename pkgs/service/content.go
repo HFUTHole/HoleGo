@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/snowflake"
 	"gorm.io/gorm"
 	"hole/pkgs/common/utils"
+	"hole/pkgs/common/utils/alias"
 	"hole/pkgs/config/fileservice"
 	"hole/pkgs/config/mysql"
 	"hole/pkgs/dao"
@@ -21,7 +22,7 @@ func NextID() int64 {
 	return int64(node.Generate())
 }
 
-func CreateContent(uid int64, title string, message string, tags []string, urls []string, real bool) (*vo.ContentVO, error) {
+func CreateContent(uid int64, title string, message string, tags []string, urls []string, real bool, nick string) (*vo.ContentVO, error) {
 	title = utils.Scape(title)
 	if len(title) > 32 {
 		return nil, &exception.ClientException{Msg: "帖子标题超出规定长度"}
@@ -50,8 +51,25 @@ func CreateContent(uid int64, title string, message string, tags []string, urls 
 			return &exception.ClientException{Msg: "未查询到该用户"}
 		}
 
-		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+		if !user.Role.Validate(role.NormalUserRole) {
 			return &exception.ClientException{Msg: "没有写帖子权限"}
+		}
+		var avatar string
+		var aid int64
+		if real {
+			nick = user.Username
+			avatar = user.Avatar
+		} else {
+			id, e := alias.GetID(nick)
+			if e != nil {
+				return &exception.ClientException{Msg: "匿名名称不存在"}
+			}
+			aid = id
+			ava, e := alias.GetAvatarByNick(nick)
+			if e != nil {
+				return &exception.ServerException{Msg: "匿名头像不存在"}
+			}
+			avatar = ava
 		}
 
 		count, err := dao.GetContentOneDayCount(tx, time.Now())
@@ -66,19 +84,17 @@ func CreateContent(uid int64, title string, message string, tags []string, urls 
 		content := &models.Content{
 			ID:      cid,
 			Uid:     user.ID,
-			Nick:    user.Username,
-			Avatar:  user.Avatar,
+			Nick:    nick,
+			Avatar:  avatar,
 			Like:    0,
 			Real:    utils.BoolToInt(real),
+			Aid:     aid,
 			Title:   title,
 			Text:    message,
 			EndTime: time.Now(),
 		}
-		err = dao.CreateContent(tx, content)
-		if err != nil {
-			return &exception.ServerException{Msg: "帖子内容创建失败"}
-		}
 
+		// 标签处理
 		if tags != nil && len(tags) > 0 {
 			err = dao.CreateAndLinkTags(tx, cid, tags)
 			if err != nil {
@@ -86,6 +102,7 @@ func CreateContent(uid int64, title string, message string, tags []string, urls 
 			}
 		}
 
+		// 引用处理
 		jumpUrls, err := SearchMessageJumpUrls(message, cid)
 		if err != nil {
 			return err
@@ -98,18 +115,25 @@ func CreateContent(uid int64, title string, message string, tags []string, urls 
 			}
 		}
 
+		// 图片处理
 		if urls != nil && len(urls) > 0 {
 			err = dao.CreateContentImages(tx, cid, urls)
 			if err != nil {
 				return &exception.ServerException{Msg: "帖子照片创建失败"}
 			}
 		}
-
 		for _, id := range urls {
-			err := fileservice.CopyFileToContent(id)
-			if err != nil {
-				return err
+			e := fileservice.CopyFileToContent(id)
+			if e != nil {
+				return &exception.ClientException{Msg: "图片拷贝错误"}
 			}
+			fileservice.DeleteFile(fileservice.TempBucket, id)
+		}
+
+		// 创建帖子
+		err = dao.CreateContent(tx, content)
+		if err != nil {
+			return &exception.ServerException{Msg: "帖子内容创建失败"}
 		}
 
 		return nil
@@ -118,12 +142,7 @@ func CreateContent(uid int64, title string, message string, tags []string, urls 
 		return nil, err
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
-	content, err := GetContent(cid)
-	return content, err
+	return GetContent(cid)
 }
 
 func GetContent(cid int64) (*vo.ContentVO, error) {
@@ -158,6 +177,8 @@ func GetContent(cid int64) (*vo.ContentVO, error) {
 		}
 
 		contentVO = vo.ConvertConvertContentVO(content, tags, urls, images)
+
+		// 填充投票
 		voting, err := GetContentVoting(cid)
 		if err != nil {
 			return &exception.BusinessException{Msg: "帖子投票查询错误"}
@@ -257,27 +278,25 @@ func GetContentNextPage(maxId int64, pageSize int) (*vo.ContentPage, error) {
 
 func DeleteContent(uid int64, cid int64) error {
 	db := mysql.GetDB()
-
 	err := db.Transaction(func(tx *gorm.DB) error {
 		user, err := dao.GetUserByID(tx, uid)
 		if err != nil {
 			return &exception.ClientException{Msg: "未查询到该用户"}
 		}
 
-		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
-			return &exception.ClientException{Msg: "没有写帖子权限"}
-		}
-
 		content, err := dao.GetContent(tx, cid)
 		if err != nil {
-			return &exception.ServerException{Msg: "帖子查询错误"}
+			return &exception.ServerException{Msg: "未查询到帖子"}
 		}
 
-		if content.Uid != user.ID {
-			return &exception.ClientException{Msg: "这不是你的帖子哦"}
+		if !(user.Role.Validate(role.AdminRole, role.SuperUserRole) ||
+			(user.Role.Validate(role.NormalUserRole) && user.ID == content.Uid)) {
+			return &exception.ClientException{Msg: "没有删除帖子权限"}
 		}
-		if content.DeleteAt.Valid == true {
-			return &exception.ClientException{Msg: "帖子已经删除"}
+
+		err = dao.UpdateContentDeleteUidByID(tx, cid, user.ID)
+		if err != nil {
+			return &exception.ClientException{Msg: "跟新删除信息错误"}
 		}
 
 		err = dao.DeleteContentByID(tx, cid)
@@ -302,7 +321,7 @@ func CreateLiked(uid int64, cid int64) (*vo.ContentVO, error) {
 			return &exception.ClientException{Msg: "未查询到该用户"}
 		}
 
-		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+		if !user.Role.Validate(role.NormalUserRole) {
 			return &exception.ClientException{Msg: "没有点赞权限"}
 		}
 
@@ -328,7 +347,7 @@ func CancelLiked(uid int64, cid int64) (*vo.ContentVO, error) {
 			return &exception.ClientException{Msg: "未查询到该用户"}
 		}
 
-		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+		if !user.Role.Validate(role.NormalUserRole) {
 			return &exception.ClientException{Msg: "没有点赞权限"}
 		}
 

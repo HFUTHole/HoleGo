@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"hole/pkgs/config"
 	"hole/pkgs/config/mysql"
+	"hole/pkgs/dao"
 	"hole/pkgs/models"
 	"testing"
 	"time"
@@ -23,7 +24,7 @@ func TestCreateContent(t *testing.T) {
 		Text:     "zou yu",
 		DeleteAt: gorm.DeletedAt{},
 	}
-	err := CreateContent(db, c)
+	err := dao.CreateContent(db, c)
 	if err != nil {
 		t.Error(err)
 	}
@@ -32,7 +33,7 @@ func TestCreateContent(t *testing.T) {
 func TestGetContentFormID(t *testing.T) {
 	db := GetDB()
 
-	content, err := GetContentByID(db, 160304679018404659)
+	content, err := dao.GetContentByID(db, 160304679018404659)
 	if err != nil {
 		t.Error(err)
 	}
@@ -41,7 +42,7 @@ func TestGetContentFormID(t *testing.T) {
 
 func TestGetContentList(t *testing.T) {
 	db := GetDB()
-	list, err := GetContentNextPage(db, 4, 2)
+	list, err := dao.GetContentNextPage(db, 4, 2)
 	if err != nil {
 		t.Error(err)
 	}
@@ -50,7 +51,7 @@ func TestGetContentList(t *testing.T) {
 
 func TestGetContentPage(t *testing.T) {
 	db := GetDB()
-	list, err := GetContentPage(db, 4)
+	list, err := dao.GetContentPage(db, 4)
 	if err != nil {
 		t.Error(err)
 	}
@@ -59,7 +60,7 @@ func TestGetContentPage(t *testing.T) {
 
 func TestGetContentJumpUrl(t *testing.T) {
 	db := GetDB()
-	list, err := GetContentJumpUrls(db, 1)
+	list, err := dao.GetContentJumpUrls(db, 1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -75,7 +76,7 @@ func TestCreateContentJumpUrl(t *testing.T) {
 		DeleteAt: gorm.DeletedAt{},
 	}
 
-	err := CreateContentJumpUrl(db, c)
+	err := dao.CreateContentJumpUrl(db, c)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,7 +98,7 @@ func TestCreateContentJumpUrls(t *testing.T) {
 		DeleteAt: gorm.DeletedAt{},
 	}
 
-	err := CreateContentJumpUrls(db, list)
+	err := dao.CreateContentJumpUrls(db, list)
 	if err != nil {
 		t.Error(err)
 	}
@@ -108,7 +109,7 @@ func TestCreateTag(t *testing.T) {
 	tag := &models.Tag{
 		Text: "test 2",
 	}
-	err := CreateTag(db, tag)
+	err := dao.CreateTag(db, tag)
 	if err != nil {
 		t.Error(err)
 	}
@@ -116,7 +117,7 @@ func TestCreateTag(t *testing.T) {
 
 func TestGetTag(t *testing.T) {
 	db := GetDB()
-	tag, err := GetTag(db, 1)
+	tag, err := dao.GetTag(db, 1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -125,7 +126,7 @@ func TestGetTag(t *testing.T) {
 
 func TestGetTagByText(t *testing.T) {
 	db := GetDB()
-	tag, err := GetTagByText(db, "test")
+	tag, err := dao.GetTagByText(db, "test")
 
 	if err != nil {
 		t.Error(err)
@@ -135,7 +136,7 @@ func TestGetTagByText(t *testing.T) {
 
 func TestGetContentTags(t *testing.T) {
 	db := GetDB()
-	tags, err := GetContentTags(db, 1)
+	tags, err := dao.GetContentTags(db, 1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -148,7 +149,7 @@ func TestLinkContentTag(t *testing.T) {
 		Cid: 1,
 		Tid: 2,
 	}
-	err := LinkContentTag(db, link)
+	err := dao.LinkContentTag(db, link)
 	if err != nil {
 		t.Error(err)
 	}
@@ -160,7 +161,7 @@ func TestCreateAndLinkTags(t *testing.T) {
 	tags[0] = "test"
 	tags[1] = "test 2"
 
-	err := CreateAndLinkTags(db, 2, tags)
+	err := dao.CreateAndLinkTags(db, 2, tags)
 	if err != nil {
 		t.Error(err)
 	}
@@ -168,7 +169,7 @@ func TestCreateAndLinkTags(t *testing.T) {
 
 func TestCreateContentImages(t *testing.T) {
 	db := GetDB()
-	err := CreateContentImages(db, 1, []string{"111.png", "2.png"})
+	err := dao.CreateContentImages(db, 1, []string{"111.png", "2.png"})
 	if err != nil {
 		t.Error(err)
 		return
@@ -177,7 +178,7 @@ func TestCreateContentImages(t *testing.T) {
 
 func TestGetContentImages(t *testing.T) {
 	db := GetDB()
-	images, err := GetContentImages(db, 1)
+	images, err := dao.GetContentImages(db, 1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -187,7 +188,7 @@ func TestGetContentImages(t *testing.T) {
 
 func TestGetContentByUid(t *testing.T) {
 	db := GetDB()
-	uid, err := GetContentOffset10ByUid(db, 1)
+	uid, err := dao.GetContentOffset10ByUid(db, 1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -197,7 +198,7 @@ func TestGetContentByUid(t *testing.T) {
 func TestGetContentOneDay(t *testing.T) {
 	db := GetDB()
 
-	day, err := GetContentOneDay(db, time.Now())
+	day, err := dao.GetContentOneDay(db, time.Now())
 	if err != nil {
 		t.Error(err)
 	}
@@ -208,7 +209,7 @@ func TestGetContentOneDay(t *testing.T) {
 func TestGetContentOneDayCount(t *testing.T) {
 	db := GetDB()
 
-	day, err := GetContentOneDayCount(db, time.Now())
+	day, err := dao.GetContentOneDayCount(db, time.Now())
 	if err != nil {
 		t.Error(err)
 	}
@@ -218,7 +219,7 @@ func TestGetContentOneDayCount(t *testing.T) {
 func TestSetContentVoteEndTime(t *testing.T) {
 	db := GetDB()
 
-	err := SetContentVoteEndTime(db, 1603642475187015680, 1, time.Now().Add(time.Hour*3))
+	err := dao.SetContentVoteEndTime(db, 1603642475187015680, 1, time.Now().Add(time.Hour*3))
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -228,13 +229,13 @@ func TestSetContentVoteEndTime(t *testing.T) {
 func TestCreateLiked(t *testing.T) {
 	config.InitConfigFileWithTest()
 	db := mysql.GetDB()
-	err := CreateLiked(db, 1, 1603642475187015680)
+	err := dao.CreateLiked(db, 1, 1603642475187015680)
 	t.Log(err)
 }
 
 func TestCancelLiked(t *testing.T) {
 	config.InitConfigFileWithTest()
 	db := mysql.GetDB()
-	err := CancelLiked(db, 1, 1603642475187015680)
+	err := dao.CancelLiked(db, 1, 1603642475187015680)
 	t.Log(err)
 }

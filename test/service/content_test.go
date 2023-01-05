@@ -3,23 +3,21 @@ package service
 import (
 	"encoding/json"
 	"hole/pkgs/config"
-	"hole/pkgs/config/logger"
-	"hole/pkgs/config/mysql"
+	"hole/pkgs/service"
 	"testing"
 )
 
 func TestCreateContent(t *testing.T) {
 	config.InitConfigFileWithTest()
-	logger.Init()
-	mysql.Init()
 
-	content, err := CreateContent(
+	content, err := service.CreateContent(
 		1,
 		"title",
 		"# zou yu",
 		[]string{"test 1"},
 		[]string{"https://hello.png"},
 		true,
+		"",
 	)
 	if err != nil {
 		t.Error(err)
@@ -30,10 +28,8 @@ func TestCreateContent(t *testing.T) {
 
 func TestSearchMessageJumpUrls(t *testing.T) {
 	config.InitConfigFileWithTest()
-	config.Init()
-	//logger.Init()
-	mysql.Init()
-	urls, err := SearchMessageJumpUrls("#1603047268133376000 #1603047268133376000 hello", 1)
+
+	urls, err := service.SearchMessageJumpUrls("#1603047268133376000 #1603047268133376000 hello", 1)
 	if err != nil {
 		t.Error(err)
 	}
@@ -43,9 +39,7 @@ func TestSearchMessageJumpUrls(t *testing.T) {
 
 func TestGetContent(t *testing.T) {
 	config.InitConfigFileWithTest()
-	//logger.Init()
-	mysql.Init()
-	content, err := GetContent(1603642730045509632)
+	content, err := service.GetContent(1603642730045509632)
 	if err != nil {
 		t.Error(err)
 	}
@@ -55,10 +49,8 @@ func TestGetContent(t *testing.T) {
 
 func TestGetContentPage(t *testing.T) {
 	config.InitConfigFileWithTest()
-	//logger.Init()
-	mysql.Init()
 
-	page, err := GetContentPage(10)
+	page, err := service.GetContentPage(10)
 	if err != nil {
 		t.Error(err)
 	}
@@ -68,10 +60,8 @@ func TestGetContentPage(t *testing.T) {
 
 func TestGetContentNextPage(t *testing.T) {
 	config.InitConfigFileWithTest()
-	//logger.Init()
-	mysql.Init()
 
-	page, err := GetContentNextPage(1603690087504154624, 10)
+	page, err := service.GetContentNextPage(1603690087504154624, 10)
 	if err != nil {
 		t.Error(err)
 	}

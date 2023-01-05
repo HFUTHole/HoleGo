@@ -3,21 +3,24 @@ package vo
 import (
 	"hole/pkgs/common/utils"
 	"hole/pkgs/models"
+	"time"
 )
 
 type ContentVO struct {
-	ID      int64                       `json:"id"`
-	Uid     int64                       `json:"uid"`
-	Nick    string                      `json:"nick"`
-	Avatar  string                      `json:"avatar"`
-	Like    int64                       `json:"like"`
-	Real    bool                        `json:"real"`
-	Title   string                      `json:"title"`
-	Text    string                      `json:"text"`
-	JumpUrl map[string]ContentJumpUrlVO `json:"jumpUrl"`
-	Tags    []TagVO                     `json:"tags"`
-	Images  []ContentImageVO            `json:"images"`
-	Voting  []VotingOptionVO            `json:"voting,omitempty"`
+	ID         int64                       `json:"id"`
+	Uid        int64                       `json:"uid"`
+	Nick       string                      `json:"nick"`
+	Avatar     string                      `json:"avatar"`
+	Like       int64                       `json:"like"`
+	Real       bool                        `json:"real"`
+	Title      string                      `json:"title"`
+	Text       string                      `json:"text"`
+	JumpUrl    map[string]ContentJumpUrlVO `json:"jumpUrl"`
+	Tags       []TagVO                     `json:"tags"`
+	Images     []ContentImageVO            `json:"images"`
+	EnableVote bool                        `json:"enableVote"`
+	EndTime    time.Time                   `json:"endTime,omitempty"`
+	Voting     []VotingOptionVO            `json:"voting,omitempty"`
 }
 
 type ContentImageVO struct {
@@ -47,19 +50,27 @@ func ConvertConvertContentVO(c *models.Content, tags []models.Tag, jumps []model
 	if c == nil {
 		return nil
 	}
+	var uid int64
+	if c.Real != 0 {
+		uid = c.Uid
+	} else {
+		uid = c.Aid
+	}
 
 	contentVO := &ContentVO{
-		ID:      c.ID,
-		Uid:     c.Uid,
-		Nick:    c.Nick,
-		Avatar:  c.Avatar,
-		Like:    c.Like,
-		Real:    utils.IntToBool(c.Real),
-		Title:   c.Title,
-		Text:    c.Text,
-		Tags:    []TagVO{},
-		JumpUrl: map[string]ContentJumpUrlVO{},
-		Images:  []ContentImageVO{},
+		ID:         c.ID,
+		Uid:        uid,
+		Nick:       c.Nick,
+		Avatar:     c.Avatar,
+		Like:       c.Like,
+		Real:       utils.IntToBool(c.Real),
+		Title:      c.Title,
+		Text:       c.Text,
+		Tags:       []TagVO{},
+		JumpUrl:    map[string]ContentJumpUrlVO{},
+		Images:     []ContentImageVO{},
+		EnableVote: utils.IntToBool(c.Voting),
+		EndTime:    c.EndTime,
 	}
 
 	if tags != nil && len(tags) > 0 {

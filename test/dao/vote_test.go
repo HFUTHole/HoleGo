@@ -1,12 +1,13 @@
 package dao
 
 import (
+	"hole/pkgs/dao"
 	"testing"
 )
 
 func TestCreateVote(t *testing.T) {
 	db := GetDB()
-	err := CreateVote(db, 1603690087504154624, []string{"option 1", "option 2"})
+	err := dao.CreateVote(db, 1603690087504154624, []string{"option 1", "option 2"})
 
 	if err != nil {
 		t.Error(err)
@@ -16,7 +17,7 @@ func TestCreateVote(t *testing.T) {
 func TestGetContentVoting(t *testing.T) {
 	db := GetDB()
 
-	voting, err := GetContentVoting(db, 1603690087504154624)
+	voting, err := dao.GetContentVoting(db, 1603690087504154624)
 
 	if err != nil {
 		t.Fatal(err)
@@ -27,7 +28,7 @@ func TestGetContentVoting(t *testing.T) {
 
 func TestVoteContent(t *testing.T) {
 	db := GetDB()
-	err := VoteContent(db, 4, 1603642475187015680, 3)
+	err := dao.VoteContent(db, 4, 1603642475187015680, 3)
 	if err != nil {
 		t.Fatal(err)
 	}

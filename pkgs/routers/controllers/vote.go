@@ -13,7 +13,6 @@ import (
 )
 
 type CreateVoteReq struct {
-	Uid     int64           `form:"uid" binding:"required"`
 	Cid     int64           `form:"cid" binding:"required"`
 	Options []string        `form:"options" binding:"required"`
 	EndTime common.DateTime `form:"endTime" time_format:"yyyy-MM-dd HH:mm:ss"`
@@ -29,7 +28,13 @@ func CreateContentVote() gin.HandlerFunc {
 			return
 		}
 
-		voting, err := service.CreateContentVoting(vote.Uid, vote.Cid, vote.Options, time.Time(vote.EndTime))
+		uid, err := utils.GetUid(ctx)
+		if err != nil {
+			response.Error403(ctx, "你可能还没有登录")
+			return
+		}
+
+		voting, err := service.CreateContentVoting(uid, vote.Cid, vote.Options, time.Time(vote.EndTime))
 		if err != nil {
 			response.HandleBusinessException(ctx, err)
 			return
@@ -39,11 +44,40 @@ func CreateContentVote() gin.HandlerFunc {
 	}
 }
 
+type DeleteContentVoteReq struct {
+	Cid int64 `json:"cid" binding:"required"`
+}
+
+func DeleteContentVote() gin.HandlerFunc {
+
+	return func(ctx *gin.Context) {
+		var req DeleteContentVoteReq
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			response.Error403(ctx, "参数错误")
+			return
+		}
+		uid, err := utils.GetUid(ctx)
+		if err != nil {
+			response.HandleBusinessException(ctx, err)
+			return
+		}
+
+		vote, err := service.DeleteContentVote(uid, req.Cid)
+		if err != nil {
+			response.HandleBusinessException(ctx, err)
+			return
+		}
+
+		response.Success(ctx, vote)
+	}
+}
+
 type VoteReq struct {
 	Vid int64 `json:"vid" binding:"required"`
 }
 
-func Vote() gin.HandlerFunc {
+func CreateVote() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var vote VoteReq
 		err := ctx.BindJSON(&vote)
@@ -72,7 +106,7 @@ func Vote() gin.HandlerFunc {
 	}
 }
 
-func CancelContentVote() gin.HandlerFunc {
+func CancelVote() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 64)
 		if err != nil {
@@ -86,7 +120,7 @@ func CancelContentVote() gin.HandlerFunc {
 			return
 		}
 
-		vo, err := service.DeleteVote(uid, cid)
+		vo, err := service.CancelVote(uid, cid)
 
 		if err != nil {
 			response.HandleBusinessException(ctx, err)
@@ -95,8 +129,4 @@ func CancelContentVote() gin.HandlerFunc {
 
 		response.Success(ctx, vo)
 	}
-}
-
-func DeleteVote() {
-
 }

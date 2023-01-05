@@ -15,3 +15,15 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: 123456
+
+#  file_service:
+#    container_name: "file_service"
+#    image: minio/minio
+#    ports:
+#      - "9000:9000"
+#      - "9090:9090"
+#    command:
+#      - server /data
+#    environment:
+#      MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+#      MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY

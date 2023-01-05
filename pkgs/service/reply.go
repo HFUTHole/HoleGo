@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"hole/pkgs/common/utils"
+	"hole/pkgs/common/utils/alias"
 	"hole/pkgs/config/fileservice"
 	"hole/pkgs/config/logger"
 	"hole/pkgs/config/mysql"
@@ -17,19 +18,20 @@ import (
 
 var ID, _ = snowflake.NewNode(1)
 
-func CreateReply(uid int64, cid int64, text string, nick string, avatar string, root int64, parent int64, real bool) ([]vo.ReplyVO, error) {
+func CreateReply(uid int64, cid int64, text string, nick string, avatar string, root int64, parent int64, real bool) (*vo.ReplyVO, error) {
 
 	scapeText := utils.Scape(text)
 	if len(scapeText) > 1024-128 {
 		return nil, &exception.ClientException{Msg: "评论内容过长"}
 	}
 
+	var rid int64
 	err := mysql.GetDB().Transaction(func(tx *gorm.DB) error {
 		user, err := dao.GetUserByID(tx, uid)
 		if err != nil {
 			return &exception.ClientException{Msg: "用户不存在"}
 		}
-		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+		if !user.Role.Validate(role.NormalUserRole) {
 			return &exception.ClientException{Msg: "您还不可以回复哦"}
 		}
 
@@ -60,7 +62,7 @@ func CreateReply(uid int64, cid int64, text string, nick string, avatar string, 
 			if len(nick) > 32 {
 				return &exception.ClientException{Msg: "nick 过长"}
 			}
-			aliasID, e := utils.AliasID(nick)
+			aliasID, e := alias.GetID(nick)
 			if e != nil {
 				return &exception.ClientException{Msg: e.Error()}
 			}
@@ -75,7 +77,7 @@ func CreateReply(uid int64, cid int64, text string, nick string, avatar string, 
 			aid = user.ID
 		}
 
-		rid := ID.Generate().Int64()
+		rid = ID.Generate().Int64()
 
 		var atName int
 		if root != -1 && root != parent {
@@ -128,7 +130,7 @@ func CreateReply(uid int64, cid int64, text string, nick string, avatar string, 
 		return nil, err
 	}
 
-	return GetReplyPage(cid, 10, 0)
+	return GetReply(cid, rid)
 }
 
 func GetReplyPage(cid int64, pageSize int, maxId int64) ([]vo.ReplyVO, error) {
@@ -219,4 +221,141 @@ func GetReplyPage(cid int64, pageSize int, maxId int64) ([]vo.ReplyVO, error) {
 	}
 
 	return replyVo, nil
+}
+
+func DeleteReply(uid int64, cid int64, rid int64) (*vo.ReplyVO, error) {
+	var root int64
+	isRoot := false
+	err := mysql.GetDB().Transaction(func(tx *gorm.DB) error {
+		user, err := dao.GetUserByID(tx, uid)
+		if err != nil {
+			return &exception.ClientException{Msg: "用户不存在"}
+		}
+
+		reply, err := dao.GetReplyByID(tx, rid)
+		if err != nil {
+			return &exception.ClientException{Msg: "未查询到该回复"}
+		}
+		root = reply.Root
+		if reply.Root == -1 {
+			isRoot = true
+		}
+
+		if !(user.Role.Validate(role.AdminRole, role.SuperUserRole) ||
+			(user.Role.Validate(role.NormalUserRole) && reply.Uid == user.ID)) {
+			return &exception.ClientException{Msg: "您还不可以删除回复哦"}
+		}
+
+		childrenId := []int64{rid}
+
+		for len(childrenId) > 0 {
+			newChildrenId, e := dao.GetRepliesIdByParent(tx, childrenId)
+			if e != nil {
+				return &exception.ServerException{Msg: "查询失败"}
+			}
+			e = dao.UpdateRepliesDeleteUid(tx, childrenId, user.ID)
+			if e != nil {
+				return &exception.ServerException{Msg: "跟新删除信息失败"}
+			}
+			e = dao.DeleteReplies(tx, childrenId)
+			if e != nil {
+				return &exception.ServerException{Msg: "删除失败"}
+			}
+			childrenId = newChildrenId
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if isRoot {
+		return nil, nil
+	} else {
+		return GetReply(cid, root)
+	}
+}
+
+func GetReply(cid int64, rid int64) (*vo.ReplyVO, error) {
+	var replyVo vo.ReplyVO
+
+	err := mysql.GetDB().Transaction(func(tx *gorm.DB) error {
+		root, err := dao.GetReplyByID(tx, rid)
+		if err != nil {
+			return &exception.ServerException{Msg: "没有查询到回复"}
+		}
+
+		if root.Root != -1 {
+			root, err = dao.GetReplyByID(tx, root.Root)
+			if err != nil {
+				return &exception.ServerException{Msg: "没有查询到回复"}
+			}
+		}
+
+		replyVo = vo.ReplyVO{
+			ID:        root.ID,
+			Cid:       root.Cid,
+			Uid:       root.Aid,
+			Nick:      root.Nick,
+			Avatar:    root.Avatar,
+			Message:   root.Message,
+			CreatedAt: root.CreatedAt,
+		}
+
+		if root.AtName != 0 {
+			atNames, _ := dao.GetAtNameByRid(tx, root.ID)
+			atNameVOS := make(map[string]vo.AtNameVO, len(atNames))
+
+			for _, atName := range atNames {
+				atNameVOS[atName.Text] = vo.AtNameVO{
+					ID:      atName.ID,
+					ReplyID: atName.ReplyID,
+					Text:    atName.Text,
+					Uid:     atName.Uid,
+				}
+			}
+			replyVo.AtName = atNameVOS
+		}
+
+		children, _ := dao.GetChildren(tx, cid, root.ID)
+
+		replyVo.List = make([]vo.ReplyChildVO, len(children))
+
+		for i2, child := range children {
+			replyVo.List[i2] = vo.ReplyChildVO{
+				ID:        child.ID,
+				Cid:       child.Cid,
+				Root:      child.Root,
+				Parent:    child.Parent,
+				Uid:       child.Aid,
+				Nick:      child.Nick,
+				Avatar:    child.Avatar,
+				Message:   child.Message,
+				CreatedAt: child.CreatedAt,
+			}
+
+			if child.AtName != 0 {
+				atNames, _ := dao.GetAtNameByRid(tx, child.ID)
+				atNameVOS := make(map[string]vo.AtNameVO, len(atNames))
+
+				for _, atName := range atNames {
+					atNameVOS[atName.Text] = vo.AtNameVO{
+						ID:      atName.ID,
+						ReplyID: atName.ReplyID,
+						Text:    atName.Text,
+						Uid:     atName.Uid,
+					}
+				}
+				replyVo.List[i2].AtName = atNameVOS
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &replyVo, nil
 }

@@ -58,13 +58,16 @@ func setupContent(api *gin.RouterGroup) {
 	api.POST("/content/voting",
 		controllers.CreateContentVote(),
 	)
+	api.DELETE("/content/voting",
+		controllers.DeleteContentVote(),
+	)
 
 	api.POST("/content/voting/:cid",
-		controllers.Vote(),
+		controllers.CreateVote(),
 	)
 
 	api.DELETE("/content/voting/:cid",
-		controllers.CancelContentVote(),
+		controllers.CancelVote(),
 	)
 
 	// 点赞
@@ -83,5 +86,9 @@ func setupContent(api *gin.RouterGroup) {
 
 	api.GET("/content/reply/:cid",
 		controllers.GetReplyPage(),
+	)
+
+	api.DELETE("/content/reply/:cid",
+		controllers.DeleteReply(),
 	)
 }

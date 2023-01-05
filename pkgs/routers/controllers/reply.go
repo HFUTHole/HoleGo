@@ -76,3 +76,37 @@ func GetReplyPage() gin.HandlerFunc {
 		response.Success(ctx, page)
 	}
 }
+func DeleteReply() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 64)
+		if err != nil {
+			response.Error403(ctx, "参数解析错误: cid")
+			return
+		}
+
+		ridstr, exits := ctx.GetQuery("rid")
+		if !exits {
+			response.Error403(ctx, "缺少参数: rid")
+			return
+		}
+		rid, err := strconv.ParseInt(ridstr, 10, 64)
+		if err != nil {
+			response.Error403(ctx, "参数解析错误: rid")
+			return
+		}
+
+		uid, err := utils.GetUid(ctx)
+		if err != nil {
+			response.Error401(ctx, "您还没有登录哦")
+			return
+		}
+
+		reply, err := service.DeleteReply(uid, cid, rid)
+		if err != nil {
+			response.HandleBusinessException(ctx, err)
+			return
+		}
+
+		response.Success(ctx, reply)
+	}
+}

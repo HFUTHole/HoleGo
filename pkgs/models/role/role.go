@@ -1,6 +1,6 @@
 package role
 
-type UserRole int32
+type UserRole uint32
 
 const (
 	BannedUserRole   UserRole = 1 << 0
@@ -23,11 +23,11 @@ func (r UserRole) Validate(roles ...UserRole) bool {
 		return false
 	}
 	for _, role := range roles {
-		if r&role == 0 {
-			return false
+		if r&role != 0 {
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 func (r UserRole) Revoke(roles ...UserRole) UserRole {

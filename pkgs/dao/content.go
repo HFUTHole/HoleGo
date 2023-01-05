@@ -12,7 +12,7 @@ func CreateContent(tx *gorm.DB, content *models.Content) error {
 }
 
 func SetContentVoteEndTime(tx *gorm.DB, cid int64, enable int, endTime time.Time) error {
-	res := map[string]interface{}{"enable_voting": enable, "end_time": endTime}
+	res := map[string]interface{}{"voting": enable, "end_time": endTime}
 	err := tx.Model(&models.Content{}).Where("id = ?", cid).Updates(res).Error
 	return err
 }
@@ -31,6 +31,11 @@ func GetContentByID(tx *gorm.DB, id int64) (*models.Content, error) {
 
 func DeleteContentByID(tx *gorm.DB, id int64) error {
 	err := tx.Model(&models.Content{}).Delete("id = ?", id).Error
+	return err
+}
+
+func UpdateContentDeleteUidByID(tx *gorm.DB, id int64, uid int64) error {
+	err := tx.Model(&models.Content{}).Where("id = ?", id).Update("delete_uid", uid).Error
 	return err
 }
 

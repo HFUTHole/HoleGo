@@ -9,12 +9,12 @@ import (
 )
 
 type ContentReq struct {
-	Uid       int64    `json:"uid"`
 	Title     string   `json:"title" binding:"required"`
 	Message   string   `json:"message" binding:"required"`
 	Tags      []string `json:"tags"`
 	ImageUrls []string `json:"images"`
 	Real      bool     `json:"real"`
+	Nick      string   `json:"nick"`
 }
 
 func CreateContent() gin.HandlerFunc {
@@ -52,8 +52,12 @@ func CreateContent() gin.HandlerFunc {
 			return
 		}
 
-		// TODO( Uid ctx)
-		content, e := service.CreateContent(req.Uid, req.Title, req.Message, req.Tags, req.ImageUrls, req.Real)
+		uid, err := utils.GetUid(ctx)
+		if err != nil {
+			response.Error401(ctx, "还没有登录哦")
+		}
+
+		content, e := service.CreateContent(uid, req.Title, req.Message, req.Tags, req.ImageUrls, req.Real, req.Nick)
 		if e != nil {
 			response.HandleBusinessException(ctx, e)
 			return

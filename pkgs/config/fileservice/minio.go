@@ -154,3 +154,11 @@ func CopyFileToContent(id string) error {
 func CopyFileToAvatar(id string) error {
 	return copyFile(TempBucket, ContentBucket, id)
 }
+
+func DeleteFile(bucket string, id string) bool {
+	err := client.RemoveObject(bucket, id)
+	if err != nil {
+		return false
+	}
+	return true
+}

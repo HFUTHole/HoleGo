@@ -11,6 +11,7 @@ type VotingOption struct {
 	Text      string         `json:"text" gorm:"type:varchar(128) not null"`
 	Total     int64          `json:"total" gorm:"type:bigint not null"`
 	DeletedAt gorm.DeletedAt `json:"deleteAt" gorm:"index"`
+	DeleteUid int64          `json:"deleteUid" gorm:"type:bigint"`
 }
 
 type VotingInfo struct {

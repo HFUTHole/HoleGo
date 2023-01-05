@@ -18,6 +18,7 @@ func CreateContentVoting(uid int64, cid int64, options []string, endTime time.Ti
 	if !utils.SliceElementMaxLength(options, 64) {
 		return nil, &exception.ClientException{Msg: "创建投票选项超过了最大长度"}
 	}
+
 	if endTime.Before(time.Now()) {
 		return nil, &exception.ClientException{Msg: "投票时间必须大于当前时间"}
 	}
@@ -26,21 +27,16 @@ func CreateContentVoting(uid int64, cid int64, options []string, endTime time.Ti
 
 		content, e := GetContent(cid)
 		if e != nil && content.ID == 0 {
-			logger.GetLogger().Error("未查询到该贴子信息", zap.Error(e), zap.Int64("uid", uid))
 			return &exception.ClientException{Msg: "未查询到该贴子信息"}
 		}
 
 		user, e := dao.GetUserByID(tx, uid)
 		if e != nil && user.ID == 0 {
-			logger.GetLogger().Error("没有查询到用户信息", zap.Error(e), zap.Int64("uid", uid))
 			return &exception.ClientException{Msg: "没有查询到用户信息"}
 		}
 
-		if user.ID != content.Uid {
-			return &exception.ClientException{Msg: "只能给自己的帖子创建投票"}
-		}
-		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
-			return &exception.ClientException{Msg: "没有发起投票权限"}
+		if !(user.Role.Validate(role.NormalUserRole) && user.ID != content.Uid) {
+			return &exception.ClientException{Msg: "您不可以发起投票哦"}
 		}
 
 		count, e := dao.GetCountContentByCid(tx, cid)
@@ -66,8 +62,7 @@ func CreateContentVoting(uid int64, cid int64, options []string, endTime time.Ti
 		return nil, err
 	}
 
-	content, err := GetContent(cid)
-	return content, nil
+	return GetContent(cid)
 }
 
 func GetContentVoting(cid int64) ([]vo.VotingOptionVO, error) {
@@ -98,7 +93,7 @@ func CreateVote(uid int64, cid int64, vid int64) (*vo.ContentVO, error) {
 			return &exception.ClientException{Msg: "没有查询到用户信息"}
 		}
 
-		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+		if !user.Role.Validate(role.NormalUserRole) {
 			return &exception.ClientException{Msg: "没有投票权限"}
 		}
 
@@ -133,13 +128,14 @@ func CreateVote(uid int64, cid int64, vid int64) (*vo.ContentVO, error) {
 	return content, err
 }
 
-func DeleteVote(uid, cid int64) (*vo.ContentVO, error) {
+func CancelVote(uid, cid int64) (*vo.ContentVO, error) {
 	err := mysql.GetDB().Transaction(func(tx *gorm.DB) error {
 		user, err := dao.GetUserByID(tx, uid)
 		if err != nil {
 			return &exception.ClientException{Msg: "用户不存在"}
 		}
-		if user.Role.Validate(role.NormalUserRole, role.AdminRole, role.SuperUserRole) {
+
+		if !user.Role.Validate(role.NormalUserRole) {
 			return &exception.ClientException{Msg: "您还不可以投票哦"}
 		}
 
@@ -151,6 +147,46 @@ func DeleteVote(uid, cid int64) (*vo.ContentVO, error) {
 		return nil
 	})
 
+	if err != nil {
+		return nil, err
+	}
+
+	return GetContent(cid)
+}
+
+func DeleteContentVote(uid int64, cid int64) (*vo.ContentVO, error) {
+	err := mysql.GetDB().Transaction(func(tx *gorm.DB) error {
+		user, err := dao.GetUserByID(tx, uid)
+		if err != nil {
+			return &exception.ClientException{Msg: "用户不存在"}
+		}
+
+		content, err := dao.GetContent(tx, cid)
+		if err != nil {
+			return &exception.ClientException{Msg: "未查询到该贴子"}
+		}
+
+		if !(user.Role.Validate(role.AdminRole, role.SuperUserRole) ||
+			(user.Role.Validate(role.NormalUserRole) && content.Uid == user.ID)) {
+			return &exception.ClientException{Msg: "您还不可以删除贴子评论哦"}
+		}
+
+		if content.Voting == 0 {
+			return &exception.ClientException{Msg: "这个帖子还没有开启投票哦"}
+		}
+
+		err = dao.UpdateVoteOptionDeleteUid(tx, content.ID, user.ID)
+		if err != nil {
+			return &exception.ServerException{Msg: "跟新删除信息错误"}
+		}
+
+		err = dao.DeleteVote(tx, cid)
+		if err != nil {
+			return &exception.ServerException{Msg: "删除失败"}
+		}
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
